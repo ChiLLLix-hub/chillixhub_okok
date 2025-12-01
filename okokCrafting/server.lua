@@ -170,7 +170,28 @@ QBCore.Functions.CreateCallback("okokCrafting:CanCraftItem", function(source, cb
 		end
 	end
 	if canCraft then
-		-- QBCore doesn't have canCarryItem, we'll assume player can carry
+		-- Check if player has inventory slots available for the crafted item
+		local itemInfo = QBCore.Shared.Items[itemID]
+		if itemInfo then
+			local totalWeight = xPlayer.Functions.GetItemByName(itemID) and 0 or (itemInfo.weight or 0) * amount
+			-- Calculate current inventory weight
+			local currentWeight = 0
+			for _, item in pairs(xPlayer.PlayerData.items) do
+				if item then
+					local iInfo = QBCore.Shared.Items[item.name]
+					if iInfo then
+						currentWeight = currentWeight + ((iInfo.weight or 0) * item.amount)
+					end
+				end
+			end
+			local maxWeight = Config and Config.MaxWeight or 120000 -- Default QBCore max weight
+			if (currentWeight + totalWeight) > maxWeight then
+				cb(false)
+				TriggerClientEvent('okokNotify:Alert', source, "CRAFTING", "You can't carry "..itemName[itemID], 5000, 'error')
+				return
+			end
+		end
+
 		for k,v in pairs(recipe) do
 			if v[3] == "true" then
 				xPlayer.Functions.RemoveItem(v[1], v[2])

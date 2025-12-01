@@ -5,11 +5,11 @@ Config = {}
 
 Config.DateFormat = '%H:%M' -- To change the date format check this website - https://www.lua.org/pil/22.1.html
 
--- [Staff Groups]
+-- [Staff Groups] - These should match QBCore ACE permission names (e.g., 'admin', 'god', 'mod')
 
 Config.StaffGroups = {
-	'superadmin',
 	'admin',
+	'god',
 	'mod'
 }
 

@@ -219,6 +219,8 @@ if Config.EnableOOCCommand then
 end
 
 function isAdmin(xPlayer)
+	-- Check using QBCore permission system (ACE permissions)
+	-- Config.StaffGroups can contain permission names like 'admin', 'god', etc.
 	for k,v in ipairs(Config.StaffGroups) do
 		if QBCore.Functions.HasPermission(xPlayer.PlayerData.source, v) then 
 			return true 
