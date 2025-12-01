@@ -1,7 +1,7 @@
 -- Leaked By: 5M-Leaks | 5M-Leaks | https://5m-leaks.com
-ESX = nil
+QBCore = nil
 
-TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
 
 local canAdvertise = true
 
@@ -13,7 +13,7 @@ end
 
 if Config.AllowStaffsToClearEveryonesChat then
 	RegisterCommand(Config.ClearEveryonesChatCommand, function(source, args, rawCommand)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local time = os.date(Config.DateFormat)
 
 		if isAdmin(xPlayer) then
@@ -28,11 +28,11 @@ end
 
 if Config.EnableStaffCommand then
 	RegisterCommand(Config.StaffCommand, function(source, args, rawCommand)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local length = string.len(Config.StaffCommand)
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
-		playerName = xPlayer.getName()
+		playerName = xPlayer.PlayerData.charinfo.firstname..' '..xPlayer.PlayerData.charinfo.lastname
 
 		if isAdmin(xPlayer) then
 			TriggerClientEvent('chat:addMessage', -1, {
@@ -45,11 +45,11 @@ end
 
 if Config.EnableStaffOnlyCommand then
 	RegisterCommand(Config.StaffOnlyCommand, function(source, args, rawCommand)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local length = string.len(Config.StaffOnlyCommand)
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
-		playerName = xPlayer.getName()
+		playerName = xPlayer.PlayerData.charinfo.firstname..' '..xPlayer.PlayerData.charinfo.lastname
 
 		if isAdmin(xPlayer) then
 			showOnlyForAdmins(function(admins)
@@ -64,16 +64,16 @@ end
 
 if Config.EnableAdvertisementCommand then
 	RegisterCommand(Config.AdvertisementCommand, function(source, args, rawCommand)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local length = string.len(Config.AdvertisementCommand)
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
-		playerName = xPlayer.getName()
-		local bankMoney = xPlayer.getAccount('bank').money
+		playerName = xPlayer.PlayerData.charinfo.firstname..' '..xPlayer.PlayerData.charinfo.lastname
+		local bankMoney = xPlayer.PlayerData.money.bank
 
 		if canAdvertise then
 			if bankMoney >= Config.AdvertisementPrice then
-				xPlayer.removeAccountMoney('bank', Config.AdvertisementPrice)
+				xPlayer.Functions.RemoveMoney('bank', Config.AdvertisementPrice)
 				TriggerClientEvent('chat:addMessage', -1, {
 					template = '<div class="chat-message advertisement"><i class="fas fa-ad"></i> <b><span style="color: #81db44">{0}</span>&nbsp;<span style="font-size: 14px; color: #e1e1e1;">{2}</span></b><div style="margin-top: 5px; font-weight: 300;">{1}</div></div>',
 					args = { playerName, message, time }
@@ -102,11 +102,11 @@ end
 
 if Config.EnableTwitchCommand then
 	RegisterCommand(Config.TwitchCommand, function(source, args, rawCommand)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local length = string.len(Config.TwitchCommand)
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
-		playerName = xPlayer.getName()
+		playerName = xPlayer.PlayerData.charinfo.firstname..' '..xPlayer.PlayerData.charinfo.lastname
 		local twitch = twitchPermission(source)
 
 		if twitch then
@@ -130,11 +130,11 @@ end
 
 if Config.EnableYoutubeCommand then
 	RegisterCommand(Config.YoutubeCommand, function(source, args, rawCommand)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local length = string.len(Config.YoutubeCommand)
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
-		playerName = xPlayer.getName()
+		playerName = xPlayer.PlayerData.charinfo.firstname..' '..xPlayer.PlayerData.charinfo.lastname
 		local youtube = youtubePermission(source)
 
 		if youtube then
@@ -158,11 +158,11 @@ end
 
 if Config.EnableTwitterCommand then
 	RegisterCommand(Config.TwitterCommand, function(source, args, rawCommand)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local length = string.len(Config.TwitterCommand)
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
-		playerName = xPlayer.getName()
+		playerName = xPlayer.PlayerData.charinfo.firstname..' '..xPlayer.PlayerData.charinfo.lastname
 
 		TriggerClientEvent('chat:addMessage', -1, {
 			template = '<div class="chat-message twitter"><i class="fab fa-twitter"></i> <b><span style="color: #2aa9e0">{0}</span>&nbsp;<span style="font-size: 14px; color: #e1e1e1;">{2}</span></b><div style="margin-top: 5px; font-weight: 300;">{1}</div></div>',
@@ -173,12 +173,12 @@ end
 
 if Config.EnablePoliceCommand then
 	RegisterCommand(Config.PoliceCommand, function(source, args, rawCommand)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local length = string.len(Config.PoliceCommand)
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
-		playerName = xPlayer.getName()
-		local job = xPlayer.job.name
+		playerName = xPlayer.PlayerData.charinfo.firstname..' '..xPlayer.PlayerData.charinfo.lastname
+		local job = xPlayer.PlayerData.job.name
 
 		if job == Config.PoliceJobName then
 			TriggerClientEvent('chat:addMessage', -1, {
@@ -191,12 +191,12 @@ end
 
 if Config.EnableAmbulanceCommand then
 	RegisterCommand(Config.AmbulanceCommand, function(source, args, rawCommand)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local length = string.len(Config.AmbulanceCommand)
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
-		playerName = xPlayer.getName()
-		local job = xPlayer.job.name
+		playerName = xPlayer.PlayerData.charinfo.firstname..' '..xPlayer.PlayerData.charinfo.lastname
+		local job = xPlayer.PlayerData.job.name
 
 		if job == Config.AmbulanceJobName then
 			TriggerClientEvent('chat:addMessage', -1, {
@@ -209,18 +209,18 @@ end
 
 if Config.EnableOOCCommand then
 	RegisterCommand(Config.OOCCommand, function(source, args, rawCommand)
-		local xPlayer = ESX.GetPlayerFromId(source)
+		local xPlayer = QBCore.Functions.GetPlayer(source)
 		local length = string.len(Config.OOCCommand)
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
-		playerName = xPlayer.getName()
+		playerName = xPlayer.PlayerData.charinfo.firstname..' '..xPlayer.PlayerData.charinfo.lastname
 		TriggerClientEvent('chat:ooc', -1, source, playerName, message, time)
 	end)
 end
 
 function isAdmin(xPlayer)
 	for k,v in ipairs(Config.StaffGroups) do
-		if xPlayer.getGroup() == v then 
+		if QBCore.Functions.HasPermission(xPlayer.PlayerData.source, v) then 
 			return true 
 		end
 	end
@@ -228,8 +228,10 @@ function isAdmin(xPlayer)
 end
 
 function showOnlyForAdmins(admins)
-	for k,v in ipairs(ESX.GetPlayers()) do
-		if isAdmin(ESX.GetPlayerFromId(v)) then
+	local players = QBCore.Functions.GetPlayers()
+	for k,v in ipairs(players) do
+		local xPlayer = QBCore.Functions.GetPlayer(v)
+		if xPlayer and isAdmin(xPlayer) then
 			admins(v)
 		end
 	end

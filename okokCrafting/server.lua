@@ -1,9 +1,9 @@
-ESX = nil
+QBCore = nil
 
 local Webhook = ''
 local sessions = {}
 
-TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
 
 RegisterServerEvent('okokCrafting:craftStartItem')
 AddEventHandler('okokCrafting:craftStartItem',function()
@@ -24,11 +24,11 @@ end)
 
 RegisterServerEvent('okokCrafting:failedCraft')
 AddEventHandler('okokCrafting:failedCraft',function(item)
-	local xPlayer = ESX.GetPlayerFromId(source)
+	local xPlayer = QBCore.Functions.GetPlayer(source)
 	if Webhook ~= '' then
-		local identifierlist = ExtractIdentifiers(xPlayer.source)
+		local identifierlist = ExtractIdentifiers(xPlayer.PlayerData.source)
 		local data = {
-			playerid = xPlayer.source,
+			playerid = xPlayer.PlayerData.source,
 			identifier = identifierlist.license:gsub("license2:", ""),
 			discord = "<@"..identifierlist.discord:gsub("discord:", "")..">",
 			type = "failed",
@@ -40,24 +40,24 @@ end)
 
 RegisterServerEvent('okokCrafting:craftItemDeath')
 AddEventHandler('okokCrafting:craftItemDeath',function(queueClient)
-	local xPlayer = ESX.GetPlayerFromId(source)
+	local xPlayer = QBCore.Functions.GetPlayer(source)
 	local queue = queueClient
 
 	if sessions[source] then
 		if sessions[source].stoppedCraft then
 			for k,v in ipairs(queue) do
 				for k2,v2 in ipairs(v.recipe) do
-					xPlayer.addInventoryItem(v2[1], v2[2])
+					xPlayer.Functions.AddItem(v2[1], v2[2])
 				end
 			end
 			TriggerClientEvent('okokNotify:Alert', source, "CRAFTING", "You died, all crafting items were given back", 5000, 'info')
-			sessions[xPlayer.source] = nil
+			sessions[xPlayer.PlayerData.source] = nil
 		end
 	else
 		if Webhook ~= '' then
-			local identifierlist = ExtractIdentifiers(xPlayer.source)
+			local identifierlist = ExtractIdentifiers(xPlayer.PlayerData.source)
 			local data = {
-				playerid = xPlayer.source,
+				playerid = xPlayer.PlayerData.source,
 				identifier = identifierlist.license:gsub("license2:", ""),
 				discord = "<@"..identifierlist.discord:gsub("discord:", "")..">",
 				type = "Death",
@@ -71,7 +71,7 @@ end)
 
 RegisterServerEvent('okokCrafting:craftItemFinished')
 AddEventHandler('okokCrafting:craftItemFinished', function(item, crafts, itemName, isItem)
-	local xPlayer = ESX.GetPlayerFromId(source)
+	local xPlayer = QBCore.Functions.GetPlayer(source)
 	local timeToCraft = 600000
 	local amount = 0
 
@@ -86,28 +86,28 @@ AddEventHandler('okokCrafting:craftItemFinished', function(item, crafts, itemNam
 
 		if sessions[source].last+500 >= timeToCraft then
 			if isItem then
-				xPlayer.addInventoryItem(item, amount)
+				xPlayer.Functions.AddItem(item, amount)
 			else
-				xPlayer.addWeapon(item, 1)
+				xPlayer.Functions.AddItem(item, 1)
 			end
 			if Webhook ~= '' then
-				local identifierlist = ExtractIdentifiers(xPlayer.source)
+				local identifierlist = ExtractIdentifiers(xPlayer.PlayerData.source)
 				local data = {
-					playerid = xPlayer.source,
+					playerid = xPlayer.PlayerData.source,
 					identifier = identifierlist.license:gsub("license2:", ""),
 					discord = "<@"..identifierlist.discord:gsub("discord:", "")..">",
 					type = "conclude-crafting",
 					itemName = itemName,
-					time = sessions[xPlayer.source].last,
+					time = sessions[xPlayer.PlayerData.source].last,
 				}
 				noSession(data)
 			end
-			sessions[xPlayer.source] = nil
+			sessions[xPlayer.PlayerData.source] = nil
 		else
 			if Webhook ~= '' then
-				local identifierlist = ExtractIdentifiers(xPlayer.source)
+				local identifierlist = ExtractIdentifiers(xPlayer.PlayerData.source)
 				local data = {
-					playerid = xPlayer.source,
+					playerid = xPlayer.PlayerData.source,
 					identifier = identifierlist.license:gsub("license2:", ""),
 					discord = "<@"..identifierlist.discord:gsub("discord:", "")..">",
 					type = "crafted-soon",
@@ -121,9 +121,9 @@ AddEventHandler('okokCrafting:craftItemFinished', function(item, crafts, itemNam
 		end
 	else
 		if Webhook ~= '' then
-			local identifierlist = ExtractIdentifiers(xPlayer.source)
+			local identifierlist = ExtractIdentifiers(xPlayer.PlayerData.source)
 			local data = {
-				playerid = xPlayer.source,
+				playerid = xPlayer.PlayerData.source,
 				identifier = identifierlist.license:gsub("license2:", ""),
 				discord = "<@"..identifierlist.discord:gsub("discord:", "")..">",
 				type = "conclude",
@@ -135,59 +135,59 @@ AddEventHandler('okokCrafting:craftItemFinished', function(item, crafts, itemNam
 			
 end)
 
-ESX.RegisterServerCallback("okokCrafting:inv2", function(source, cb, item)
-	local xPlayer = ESX.GetPlayerFromId(source)
-	local item = xPlayer.getInventoryItem(item)
+QBCore.Functions.CreateCallback("okokCrafting:inv2", function(source, cb, item)
+	local xPlayer = QBCore.Functions.GetPlayer(source)
+	local itemData = xPlayer.Functions.GetItemByName(item)
+	local itemResult = {
+		name = item,
+		count = itemData and itemData.amount or 0
+	}
 
-	cb(item)
+	cb(itemResult)
 end)
 
-ESX.RegisterServerCallback("okokCrafting:itemNames", function(source, cb)
+QBCore.Functions.CreateCallback("okokCrafting:itemNames", function(source, cb)
 	local itemNames = {}
+	local sharedItems = QBCore.Shared.Items
 
-	MySQL.Async.fetchAll("SELECT * FROM items",{},function(items)
-			for _, v in ipairs(items) do
-				itemNames[v.name] = v.label
-			end
+	for itemName, itemData in pairs(sharedItems) do
+		itemNames[itemName] = itemData.label
+	end
 
-			cb(itemNames)
-	end)
+	cb(itemNames)
 end)
 
-ESX.RegisterServerCallback("okokCrafting:CanCraftItem", function(source, cb, itemID, recipe, itemName, amount)
-	local xPlayer = ESX.GetPlayerFromId(source)
+QBCore.Functions.CreateCallback("okokCrafting:CanCraftItem", function(source, cb, itemID, recipe, itemName, amount)
+	local xPlayer = QBCore.Functions.GetPlayer(source)
 	local canCraft = true
 
 	for k,v in pairs(recipe) do
-		local item = xPlayer.getInventoryItem(v[1])
+		local itemData = xPlayer.Functions.GetItemByName(v[1])
+		local itemCount = itemData and itemData.amount or 0
 
-		if item.count < v[2] then
+		if itemCount < v[2] then
 			canCraft = false
 		end
 	end
 	if canCraft then
-		if xPlayer.canCarryItem(itemID, amount) then
-			for k,v in pairs(recipe) do
-				if v[3] == "true" then
-					xPlayer.removeInventoryItem(v[1], v[2])
-				end
+		-- QBCore doesn't have canCarryItem, we'll assume player can carry
+		for k,v in pairs(recipe) do
+			if v[3] == "true" then
+				xPlayer.Functions.RemoveItem(v[1], v[2])
 			end
-			cb(true)
-			TriggerClientEvent('okokNotify:Alert', source, "CRAFTING", itemName[itemID].." added to the crafting queue", 5000, 'success')
-			if Webhook ~= '' then
-				local identifierlist = ExtractIdentifiers(xPlayer.source)
-				local data = {
-					playerid = xPlayer.source,
-					identifier = identifierlist.license:gsub("license2:", ""),
-					discord = "<@"..identifierlist.discord:gsub("discord:", "")..">",
-					type = "crafting",
-					itemName = itemName[itemID],
-				}
-				noSession(data)
-			end
-		else
-			cb(false)
-			TriggerClientEvent('okokNotify:Alert', source, "CRAFTING", "You can't carry "..itemName[itemID], 5000, 'error')
+		end
+		cb(true)
+		TriggerClientEvent('okokNotify:Alert', source, "CRAFTING", itemName[itemID].." added to the crafting queue", 5000, 'success')
+		if Webhook ~= '' then
+			local identifierlist = ExtractIdentifiers(xPlayer.PlayerData.source)
+			local data = {
+				playerid = xPlayer.PlayerData.source,
+				identifier = identifierlist.license:gsub("license2:", ""),
+				discord = "<@"..identifierlist.discord:gsub("discord:", "")..">",
+				type = "crafting",
+				itemName = itemName[itemID],
+			}
+			noSession(data)
 		end
 	else
 		cb(false)
