@@ -1,9 +1,9 @@
 -- Leaked By: 5M-Leaks | 5M-Leaks | https://5m-leaks.com
-ESX = nil
+QBCore = nil
 
 Citizen.CreateThread(function()
-	while ESX == nil do
-		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+	while QBCore == nil do
+		TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
 		Citizen.Wait(0)
 	end
 end)

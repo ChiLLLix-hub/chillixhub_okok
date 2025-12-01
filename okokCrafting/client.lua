@@ -1,4 +1,4 @@
-ESX = nil
+QBCore = nil
 
 local isCraftOpen = false
 local SE = TriggerServerEvent
@@ -11,14 +11,14 @@ local closestBlip
 local maxCraftRadius
 
 Citizen.CreateThread(function()
-	while ESX == nil do
-		TriggerEvent("esx:getSharedObject", function(obj) ESX = obj end)
+	while QBCore == nil do
+		TriggerEvent("QBCore:GetObject", function(obj) QBCore = obj end)
 		Citizen.Wait(0)
 	end
-	while ESX.GetPlayerData().job == nil do
+	while QBCore.Functions.GetPlayerData().job == nil do
 		Citizen.Wait(10)
 	end
-	PlayerData = ESX.GetPlayerData()
+	PlayerData = QBCore.Functions.GetPlayerData()
 end)
 
 Citizen.CreateThread(function()
@@ -95,7 +95,10 @@ Citizen.CreateThread(function()
 				if distance < v.radius then
 					inZone = true
 					if not Config.UseOkokTextUI and not isCraftOpen then
-						ESX.ShowHelpNotification('~INPUT_CONTEXT~ To open crafting table')
+						-- QBCore doesn't have ShowHelpNotification, use native instead
+						BeginTextCommandDisplayHelp("STRING")
+						AddTextComponentSubstringPlayerName('~INPUT_CONTEXT~ To open crafting table')
+						EndTextCommandDisplayHelp(0, false, true, -1)
 					end
 					if IsControlJustReleased(0, Config.Key) then
 						if GetVehiclePedIsUsing(PlayerPedId()) == 0 then
@@ -113,14 +116,14 @@ Citizen.CreateThread(function()
 									DisplayRadar(false)
 								end
 								
-								ESX.TriggerServerCallback("okokCrafting:itemNames", function(itemNames)
+								QBCore.Functions.TriggerCallback("okokCrafting:itemNames", function(itemNames)
 									SetNuiFocus(true, true)
 									SendNUIMessage({
 										action = "openCraft",
 										name = v.tableName,
 										craft = v.crafts,
 										itemNames = itemNames,
-										job = ESX.GetPlayerData().job.name,
+										job = QBCore.Functions.GetPlayerData().job.name,
 										wb = v.tableID,
 									})
 								end)
@@ -182,7 +185,7 @@ RegisterNUICallback('action', function(data, cb)
 			if data.item == v.item then
 				for k2,v2 in pairs(v.recipe) do
 					loop = loop + 1
-					ESX.TriggerServerCallback("okokCrafting:inv2", function(item)
+					QBCore.Functions.TriggerCallback("okokCrafting:inv2", function(item)
 						local key = item.name
 						local value = {key = item.count}
 						table.insert(invItems, value)
@@ -227,12 +230,12 @@ RegisterNUICallback('action', function(data, cb)
 			maxCraftRadius = maxCraftRadius,
 		}
 		table.insert(queue, item)
-		ESX.TriggerServerCallback("okokCrafting:itemNames", function(itemNames)
-			ESX.TriggerServerCallback("okokCrafting:CanCraftItem", function(canCraft)
+		QBCore.Functions.TriggerCallback("okokCrafting:itemNames", function(itemNames)
+			QBCore.Functions.TriggerCallback("okokCrafting:CanCraftItem", function(canCraft)
 				if canCraft then
 					for k2,v2 in pairs(recipeTable) do
 						loop = loop + 1
-						ESX.TriggerServerCallback("okokCrafting:inv2", function(item)
+						QBCore.Functions.TriggerCallback("okokCrafting:inv2", function(item)
 							local key = item.name
 							local value = {key = item.count}
 							table.insert(invItems, value)
@@ -266,7 +269,7 @@ RegisterNUICallback('action', function(data, cb)
 								
 								for k,v in pairs(queue[1].recipe) do
 									loop = loop + 1
-									ESX.TriggerServerCallback("okokCrafting:inv2", function(item)
+									QBCore.Functions.TriggerCallback("okokCrafting:inv2", function(item)
 										local key = item.name
 										local value = {key = item.count}
 										table.insert(invItems, value)
