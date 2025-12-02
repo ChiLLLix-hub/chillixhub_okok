@@ -1,4 +1,4 @@
-QBCore = nil
+local QBCore = exports['qb-core']:GetCoreObject()
 local PlayerData = {}
 local trans = {}
 local societyTrans = {}
@@ -13,10 +13,6 @@ local closestATM, atmPos
 local playerName, playerBankMoney, playerIBAN, trsIdentifier, allDaysValues, walletMoney
 
 Citizen.CreateThread(function()
-	while QBCore == nil do
-		TriggerEvent("QBCore:GetObject", function(obj) QBCore = obj end)
-		Citizen.Wait(0)
-    end
 	while QBCore.Functions.GetPlayerData().job == nil do
 		Citizen.Wait(10)
 	end

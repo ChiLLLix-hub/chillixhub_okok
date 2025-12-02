@@ -61,11 +61,9 @@ end)
 
 AddEventHandler("chatMessage", function(source, color, message)
 	local src = source
-	args = stringsplit(message, " ")
-	CancelEvent()
-	if string.find(args[1], "/") then
-		local cmd = args[1]
-		table.remove(args, 1)
+	local args = stringsplit(message, " ")
+	if args[1] and string.find(args[1], "^/") then
+		CancelEvent()
 	end
 end)
 
