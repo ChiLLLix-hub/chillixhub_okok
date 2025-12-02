@@ -1,9 +1,7 @@
-QBCore = nil
+local QBCore = exports['qb-core']:GetCoreObject()
 
 local Webhook = ''
 local sessions = {}
-
-TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
 
 RegisterServerEvent('okokCrafting:craftStartItem')
 AddEventHandler('okokCrafting:craftStartItem',function()
