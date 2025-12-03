@@ -19,4 +19,4 @@ CREATE TABLE `okokbanking_societies` (
 );
 
 ALTER TABLE `players` ADD COLUMN `pincode` int(50) NULL DEFAULT NULL;
-ALTER TABLE `management_funds` ADD COLUMN `iban` varchar(255) DEFAULT NULL;
+ALTER TABLE `players` ADD COLUMN `iban` varchar(255) DEFAULT NULL;
