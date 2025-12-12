@@ -299,7 +299,7 @@ The **okokChat** module is **SAFE** and **SECURE** for use in production environ
 
 **Auditor:** GitHub Copilot Security Agent  
 **Methodology:** Static code analysis, pattern matching, manual review  
-**Confidence Level:** High (95%+)  
+**Confidence Level:** High (95-98%)  
 **Next Review:** Recommended in 6 months or after major updates  
 
 ---

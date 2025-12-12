@@ -283,11 +283,10 @@ curl -o vue.min.js https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js
 <script src="vue.min.js"></script>
 ```
 
-3. Add to `fxmanifest.lua`:
+3. Update `fxmanifest.lua` if needed:
 ```lua
 files {
-	'web/*.*',
-	'web/vue.min.js',  -- Explicitly include
+	'web/*.*',  -- This already includes vue.min.js
 }
 ```
 

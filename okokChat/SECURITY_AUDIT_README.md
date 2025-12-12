@@ -178,7 +178,7 @@ okokChat is a legitimate FiveM chat enhancement providing:
 ---
 
 **Audit Completed By:** GitHub Copilot Security Agent  
-**Confidence Level:** High (95%+)  
+**Confidence Level:** High (95-98%)  
 **Status:** ✅ **COMPLETE**
 
 ---
