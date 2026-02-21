@@ -199,11 +199,14 @@ end
 
 if Config.EnableTwitterCommand then
 	RegisterCommand(Config.TwitterCommand, function(source, args, rawCommand)
+		if not rawCommand then return end
 		local xPlayer = GetSafePlayer(source)
 		local length = string.len(Config.TwitterCommand)
-		local message = rawCommand:sub(length + 1)
+		local message = rawCommand:sub(length + 1):match('^%s*(.-)%s*$')
 		local time = os.date(Config.DateFormat)
-		playerName = GetPlayerDisplayName(xPlayer, source)
+		local playerName = GetPlayerDisplayName(xPlayer, source)
+
+		if not message or message == '' then return end
 
 		TriggerClientEvent('chat:addMessage', -1, {
 			template = '<div class="chat-message twitter"><i class="fab fa-twitter"></i> <b><span style="color: #2aa9e0">{0}</span>&nbsp;<span style="font-size: 14px; color: #e1e1e1;">{2}</span></b><div style="margin-top: 5px; font-weight: 300;">{1}</div></div>',
