@@ -36,14 +36,6 @@ local function GetPlayerJobName(xPlayer)
 	return ''
 end
 
--- Returns the player's bank balance, or 0 when data is missing
-local function GetPlayerBankBalance(xPlayer)
-	if xPlayer and xPlayer.PlayerData and xPlayer.PlayerData.money then
-		return xPlayer.PlayerData.money.bank or 0
-	end
-	return 0
-end
-
 local canAdvertise = true
 
 if Config.AllowPlayersToClearTheirChat then
@@ -110,7 +102,7 @@ if Config.EnableAdvertisementCommand then
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
 		playerName = GetPlayerDisplayName(xPlayer, source)
-		local bankMoney = GetPlayerBankBalance(xPlayer)
+		local bankMoney = xPlayer and xPlayer.Functions.GetMoney('bank') or 0
 
 		if canAdvertise then
 			if xPlayer and bankMoney >= Config.AdvertisementPrice then
@@ -217,12 +209,15 @@ end
 
 if Config.EnablePoliceCommand then
 	RegisterCommand(Config.PoliceCommand, function(source, args, rawCommand)
+		if not rawCommand then return end
 		local xPlayer = GetSafePlayer(source)
 		local length = string.len(Config.PoliceCommand)
-		local message = rawCommand:sub(length + 1)
+		local message = rawCommand:sub(length + 1):match('^%s*(.-)%s*$')
 		local time = os.date(Config.DateFormat)
 		playerName = GetPlayerDisplayName(xPlayer, source)
 		local job = GetPlayerJobName(xPlayer)
+
+		if not message or message == '' then return end
 
 		if job == Config.PoliceJobName then
 			TriggerClientEvent('chat:addMessage', -1, {
@@ -235,12 +230,15 @@ end
 
 if Config.EnableAmbulanceCommand then
 	RegisterCommand(Config.AmbulanceCommand, function(source, args, rawCommand)
+		if not rawCommand then return end
 		local xPlayer = GetSafePlayer(source)
 		local length = string.len(Config.AmbulanceCommand)
-		local message = rawCommand:sub(length + 1)
+		local message = rawCommand:sub(length + 1):match('^%s*(.-)%s*$')
 		local time = os.date(Config.DateFormat)
 		playerName = GetPlayerDisplayName(xPlayer, source)
 		local job = GetPlayerJobName(xPlayer)
+
+		if not message or message == '' then return end
 
 		if job == Config.AmbulanceJobName then
 			TriggerClientEvent('chat:addMessage', -1, {
