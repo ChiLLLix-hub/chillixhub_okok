@@ -57,7 +57,7 @@ Config.TwitchCommand = 'twitch'
 
 -- Types of identifiers: steam: | license: | xbl: | live: | discord: | fivem: | ip:
 Config.TwitchList = {
-	'steam:110000118a12j8a' -- Example, change this
+	'fivem:822688' -- Example, change this
 }
 
 --------------------------------
@@ -69,7 +69,7 @@ Config.YoutubeCommand = 'youtube'
 
 -- Types of identifiers: steam: | license: | xbl: | live: | discord: | fivem: | ip:
 Config.YoutubeList = {
-	'steam:110000118a12j8a' -- Example, change this
+	'fivem:822688' -- Example, change this
 }
 
 --------------------------------
@@ -105,5 +105,6 @@ Config.EnableOOCCommand = true
 Config.OOCCommand = 'ooc'
 
 Config.OOCDistance = 20.0
+
 
 --------------------------------
