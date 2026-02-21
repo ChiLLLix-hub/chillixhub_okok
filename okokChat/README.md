@@ -1,4 +1,3 @@
--- Leaked By: 5M-Leaks | 5M-Leaks | https://5m-leaks.com
 Hi, thank you for buying my script, I'm very grateful!
 
 If you need help contact me on discord: okok#3488
@@ -35,3 +34,4 @@ Discord server: https://discord.gg/FauTgGRUku
 		})
 		end
 	end)
+
