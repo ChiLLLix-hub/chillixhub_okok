@@ -36,14 +36,6 @@ local function GetPlayerJobName(xPlayer)
 	return ''
 end
 
--- Returns the player's bank balance, or 0 when data is missing
-local function GetPlayerBankBalance(xPlayer)
-	if xPlayer and xPlayer.PlayerData and xPlayer.PlayerData.money then
-		return xPlayer.PlayerData.money.bank or 0
-	end
-	return 0
-end
-
 local canAdvertise = true
 
 if Config.AllowPlayersToClearTheirChat then
@@ -110,7 +102,7 @@ if Config.EnableAdvertisementCommand then
 		local message = rawCommand:sub(length + 1)
 		local time = os.date(Config.DateFormat)
 		playerName = GetPlayerDisplayName(xPlayer, source)
-		local bankMoney = GetPlayerBankBalance(xPlayer)
+		local bankMoney = xPlayer and xPlayer.Functions.GetMoney('bank') or 0
 
 		if canAdvertise then
 			if xPlayer and bankMoney >= Config.AdvertisementPrice then
@@ -228,12 +220,10 @@ if Config.EnablePoliceCommand then
 		if not message or message == '' then return end
 
 		if job == Config.PoliceJobName then
-			showOnlyForJob(Config.PoliceJobName, function(player)
-				TriggerClientEvent('chat:addMessage', player, {
-					template = '<div class="chat-message police"><i class="fas fa-bullhorn"></i> <b><span style="color: #4a6cfd">{0}</span>&nbsp;<span style="font-size: 14px; color: #e1e1e1;">{2}</span></b><div style="margin-top: 5px; font-weight: 300;">{1}</div></div>',
-					args = { playerName, message, time }
-				})
-			end)
+			TriggerClientEvent('chat:addMessage', -1, {
+				template = '<div class="chat-message police"><i class="fas fa-bullhorn"></i> <b><span style="color: #4a6cfd">{0}</span>&nbsp;<span style="font-size: 14px; color: #e1e1e1;">{2}</span></b><div style="margin-top: 5px; font-weight: 300;">{1}</div></div>',
+				args = { playerName, message, time }
+			})
 		end
 	end)
 end
@@ -251,12 +241,10 @@ if Config.EnableAmbulanceCommand then
 		if not message or message == '' then return end
 
 		if job == Config.AmbulanceJobName then
-			showOnlyForJob(Config.AmbulanceJobName, function(player)
-				TriggerClientEvent('chat:addMessage', player, {
-					template = '<div class="chat-message ambulance"><i class="fas fa-ambulance"></i> <b><span style="color: #e3a71b">{0}</span>&nbsp;<span style="font-size: 14px; color: #e1e1e1;">{2}</span></b><div style="margin-top: 5px; font-weight: 300;">{1}</div></div>',
-					args = { playerName, message, time }
-				})
-			end)
+			TriggerClientEvent('chat:addMessage', -1, {
+				template = '<div class="chat-message ambulance"><i class="fas fa-ambulance"></i> <b><span style="color: #e3a71b">{0}</span>&nbsp;<span style="font-size: 14px; color: #e1e1e1;">{2}</span></b><div style="margin-top: 5px; font-weight: 300;">{1}</div></div>',
+				args = { playerName, message, time }
+			})
 		end
 	end)
 end
@@ -291,20 +279,6 @@ function showOnlyForAdmins(admins)
 		local xPlayer = QBCore.Functions.GetPlayer(v)
 		if xPlayer and isAdmin(xPlayer) then
 			admins(v)
-		end
-	end
-end
-
-function showOnlyForJob(jobName, callback)
-	if not QBCore then
-		print('[okokChat2] WARNING: QBCore not available, cannot deliver job-specific message for job: ' .. tostring(jobName))
-		return
-	end
-	local players = QBCore.Functions.GetPlayers()
-	for k, v in ipairs(players) do
-		local xPlayer = QBCore.Functions.GetPlayer(v)
-		if xPlayer and GetPlayerJobName(xPlayer) == jobName then
-			callback(v)
 		end
 	end
 end
