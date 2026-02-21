@@ -23,6 +23,7 @@ end)
 RegisterServerEvent('okokCrafting:failedCraft')
 AddEventHandler('okokCrafting:failedCraft',function(item)
 	local xPlayer = QBCore.Functions.GetPlayer(source)
+	if not xPlayer then return end
 	if Webhook ~= '' then
 		local identifierlist = ExtractIdentifiers(xPlayer.PlayerData.source)
 		local data = {
@@ -39,6 +40,7 @@ end)
 RegisterServerEvent('okokCrafting:craftItemDeath')
 AddEventHandler('okokCrafting:craftItemDeath',function(queueClient)
 	local xPlayer = QBCore.Functions.GetPlayer(source)
+	if not xPlayer then return end
 	local queue = queueClient
 
 	if sessions[source] then
@@ -70,6 +72,7 @@ end)
 RegisterServerEvent('okokCrafting:craftItemFinished')
 AddEventHandler('okokCrafting:craftItemFinished', function(item, crafts, itemName, isItem)
 	local xPlayer = QBCore.Functions.GetPlayer(source)
+	if not xPlayer then return end
 	local timeToCraft = 600000
 	local amount = 0
 

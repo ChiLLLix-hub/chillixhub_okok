@@ -1,5 +1,12 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
+-- Returns floored integer if amount is a positive number, otherwise nil
+local function ValidateAmount(amount)
+	local n = tonumber(amount)
+	if not n or n <= 0 then return nil end
+	return math.floor(n)
+end
+
 QBCore.Functions.CreateCallback("okokBanking:GetPlayerInfo", function(source, cb)
 	local xPlayer = QBCore.Functions.GetPlayer(source)
 	exports['ghmattimysql']:execute('SELECT * FROM players WHERE citizenid = @identifier', {
@@ -77,6 +84,7 @@ end)
 RegisterServerEvent("okokBanking:SetIBAN")
 AddEventHandler("okokBanking:SetIBAN", function(iban)
 	local xPlayer = QBCore.Functions.GetPlayer(source)
+	if not xPlayer then return end
 
 	exports['ghmattimysql']:execute('UPDATE players SET iban = @iban WHERE citizenid = @identifier', {
 		['@identifier'] = xPlayer.PlayerData.citizenid,
@@ -89,6 +97,12 @@ RegisterServerEvent("okokBanking:DepositMoney")
 AddEventHandler("okokBanking:DepositMoney", function(amount)
 	local _source = source
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
+	amount = ValidateAmount(amount)
+	if not amount then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "Invalid amount", 5000, 'error')
+		return
+	end
 	local playerMoney = xPlayer.PlayerData.money.cash
 
 	if amount <= playerMoney then
@@ -108,6 +122,12 @@ RegisterServerEvent("okokBanking:WithdrawMoney")
 AddEventHandler("okokBanking:WithdrawMoney", function(amount)
 	local _source = source
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
+	amount = ValidateAmount(amount)
+	if not amount then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "Invalid amount", 5000, 'error')
+		return
+	end
 	local playerMoney = xPlayer.PlayerData.money.bank
 
 	if amount <= playerMoney then
@@ -127,6 +147,12 @@ RegisterServerEvent("okokBanking:TransferMoney")
 AddEventHandler("okokBanking:TransferMoney", function(amount, ibanNumber, targetIdentifier, acc, targetName)
 	local _source = source
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
+	amount = ValidateAmount(amount)
+	if not amount then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "Invalid amount", 5000, 'error')
+		return
+	end
 	local xTarget = QBCore.Functions.GetPlayerByCitizenId(targetIdentifier)
 	local xPlayers = QBCore.Functions.GetPlayers()
 	local playerMoney = xPlayer.PlayerData.money.bank
@@ -181,6 +207,12 @@ RegisterServerEvent("okokBanking:DepositMoneyToSociety")
 AddEventHandler("okokBanking:DepositMoneyToSociety", function(amount, society, societyName)
 	local _source = source
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
+	amount = ValidateAmount(amount)
+	if not amount then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "Invalid amount", 5000, 'error')
+		return
+	end
 	local playerMoney = xPlayer.PlayerData.money.cash
 
 	if amount <= playerMoney then
@@ -205,6 +237,12 @@ RegisterServerEvent("okokBanking:WithdrawMoneyToSociety")
 AddEventHandler("okokBanking:WithdrawMoneyToSociety", function(amount, society, societyName, societyMoney)
 	local _source = source
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
+	amount = ValidateAmount(amount)
+	if not amount then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "Invalid amount", 5000, 'error')
+		return
+	end
 	local db
 	local hasChecked = false
 
@@ -260,6 +298,12 @@ RegisterServerEvent("okokBanking:TransferMoneyToSociety")
 AddEventHandler("okokBanking:TransferMoneyToSociety", function(amount, ibanNumber, societyName, society)
 	local _source = source
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
+	amount = ValidateAmount(amount)
+	if not amount then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "Invalid amount", 5000, 'error')
+		return
+	end
 	local playerMoney = xPlayer.PlayerData.money.bank
 
 		if amount <= playerMoney then
@@ -283,8 +327,12 @@ RegisterServerEvent("okokBanking:TransferMoneyToSocietyFromSociety")
 AddEventHandler("okokBanking:TransferMoneyToSocietyFromSociety", function(amount, ibanNumber, societyNameTarget, societyTarget, society, societyName, societyMoney)
 	local _source = source
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
-	local xTarget = QBCore.Functions.GetPlayerByCitizenId(targetIdentifier)
-	local xPlayers = QBCore.Functions.GetPlayers()
+	if not xPlayer then return end
+	amount = ValidateAmount(amount)
+	if not amount then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "Invalid amount", 5000, 'error')
+		return
+	end
 
 	if amount <= societyMoney then
 		exports['ghmattimysql']:execute('UPDATE okokBanking_societies SET value = value - @value WHERE society = @society AND society_name = @society_name', {
@@ -311,6 +359,12 @@ RegisterServerEvent("okokBanking:TransferMoneyToPlayerFromSociety")
 AddEventHandler("okokBanking:TransferMoneyToPlayerFromSociety", function(amount, ibanNumber, targetIdentifier, acc, targetName, society, societyName, societyMoney, toMyself)
 	local _source = source
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
+	amount = ValidateAmount(amount)
+	if not amount then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "Invalid amount", 5000, 'error')
+		return
+	end
 	local xTarget = QBCore.Functions.GetPlayerByCitizenId(targetIdentifier)
 	local xPlayers = QBCore.Functions.GetPlayers()
 
@@ -690,6 +744,7 @@ AddEventHandler("okokBanking:AddDepositTransaction", function(amount, source_)
 	end
 
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
 
 	exports['ghmattimysql']:execute('INSERT INTO okokBanking_transactions (receiver_identifier, receiver_name, sender_identifier, sender_name, date, value, type) VALUES (@receiver_identifier, @receiver_name, @sender_identifier, @sender_name, CURRENT_TIMESTAMP(), @value, @type)', {
 		['@receiver_identifier'] = 'bank',
@@ -712,6 +767,7 @@ AddEventHandler("okokBanking:AddWithdrawTransaction", function(amount, source_)
 	end
 
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
 
 	exports['ghmattimysql']:execute('INSERT INTO okokBanking_transactions (receiver_identifier, receiver_name, sender_identifier, sender_name, date, value, type) VALUES (@receiver_identifier, @receiver_name, @sender_identifier, @sender_name, CURRENT_TIMESTAMP(), @value, @type)', {
 		['@receiver_identifier'] = tostring(xPlayer.PlayerData.citizenid),
@@ -734,6 +790,7 @@ AddEventHandler("okokBanking:AddTransferTransaction", function(amount, xTarget, 
 	end
 
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
 	if targetName == nil then
 		exports['ghmattimysql']:execute('INSERT INTO okokBanking_transactions (receiver_identifier, receiver_name, sender_identifier, sender_name, date, value, type) VALUES (@receiver_identifier, @receiver_name, @sender_identifier, @sender_name, CURRENT_TIMESTAMP(), @value, @type)', {
 			['@receiver_identifier'] = tostring(xTarget.PlayerData.citizenid),
@@ -767,6 +824,7 @@ AddEventHandler("okokBanking:AddTransferTransactionToSociety", function(amount, 
 	end
 
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
 	exports['ghmattimysql']:execute('INSERT INTO okokBanking_transactions (receiver_identifier, receiver_name, sender_identifier, sender_name, date, value, type) VALUES (@receiver_identifier, @receiver_name, @sender_identifier, @sender_name, CURRENT_TIMESTAMP(), @value, @type)', {
 		['@receiver_identifier'] = society,
 		['@receiver_name'] = societyName,
@@ -816,6 +874,7 @@ AddEventHandler("okokBanking:AddDepositTransactionToSociety", function(amount, s
 	end
 
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
 
 	exports['ghmattimysql']:execute('INSERT INTO okokBanking_transactions (receiver_identifier, receiver_name, sender_identifier, sender_name, date, value, type) VALUES (@receiver_identifier, @receiver_name, @sender_identifier, @sender_name, CURRENT_TIMESTAMP(), @value, @type)', {
 		['@receiver_identifier'] = society,
@@ -838,6 +897,7 @@ AddEventHandler("okokBanking:AddWithdrawTransactionToSociety", function(amount, 
 	end
 
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
+	if not xPlayer then return end
 
 	exports['ghmattimysql']:execute('INSERT INTO okokBanking_transactions (receiver_identifier, receiver_name, sender_identifier, sender_name, date, value, type) VALUES (@receiver_identifier, @receiver_name, @sender_identifier, @sender_name, CURRENT_TIMESTAMP(), @value, @type)', {
 		['@receiver_identifier'] = tostring(xPlayer.PlayerData.citizenid),
@@ -854,23 +914,35 @@ RegisterServerEvent("okokBanking:UpdateIbanDB")
 AddEventHandler("okokBanking:UpdateIbanDB", function(iban, amount)
 	local _source = source
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
-
-	if amount <= xPlayer.PlayerData.money.bank then
+	if not xPlayer then return end
+	-- Always use the server-side config cost; ignore client-supplied amount
+	local cost = Config.IBANChangeCost or 0
+	-- Validate IBAN: only alphanumeric characters and within the allowed length
+	if type(iban) ~= 'string' then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "Invalid IBAN", 5000, 'error')
+		return
+	end
+	local ibanClean = iban:upper():match('^[A-Z0-9]+$')
+	if not ibanClean or #iban < 2 or #iban > (string.len(Config.IBANPrefix) + Config.CustomIBANMaxChars) then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "Invalid IBAN format", 5000, 'error')
+		return
+	end
+	if cost <= xPlayer.PlayerData.money.bank then
 		exports['ghmattimysql']:execute('UPDATE players SET iban = @iban WHERE citizenid = @identifier', {
 			['@iban'] = iban,
 			['@identifier'] = xPlayer.PlayerData.citizenid,
 		}, function(changed)
 		end)
 
-		xPlayer.Functions.RemoveMoney('bank', amount)
+		xPlayer.Functions.RemoveMoney('bank', cost)
 		xPlayer = QBCore.Functions.GetPlayer(_source)
 		TriggerClientEvent('okokBanking:updateMoney', _source, xPlayer.PlayerData.money.bank, xPlayer.PlayerData.money.cash)
-		TriggerEvent('okokBanking:AddTransferTransactionToSociety', amount, _source, "bank", "Bank (IBAN)")
+		TriggerEvent('okokBanking:AddTransferTransactionToSociety', cost, _source, "bank", "Bank (IBAN)")
 		TriggerClientEvent('okokBanking:updateIban', _source, iban)
 		TriggerClientEvent('okokBanking:updateIbanPinChange', _source)
 		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "IBAN successfully changed to "..iban, 5000, 'success')
 	else
-		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "You need to have "..amount.."€ in order to change your IBAN", 5000, 'error')
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "You need to have "..cost.."€ in order to change your IBAN", 5000, 'error')
 	end
 end)
 
@@ -878,22 +950,29 @@ RegisterServerEvent("okokBanking:UpdatePINDB")
 AddEventHandler("okokBanking:UpdatePINDB", function(pin, amount)
 	local _source = source
 	local xPlayer = QBCore.Functions.GetPlayer(_source)
-
-	if amount <= xPlayer.PlayerData.money.bank then
+	if not xPlayer then return end
+	-- Always use the server-side config cost; ignore client-supplied amount
+	local cost = Config.PINChangeCost or 0
+	-- Validate PIN server-side: must be exactly 4 numeric digits
+	if type(pin) ~= 'string' or not pin:match('^%d%d%d%d$') then
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "PIN must be exactly 4 digits", 5000, 'error')
+		return
+	end
+	if cost <= xPlayer.PlayerData.money.bank then
 		exports['ghmattimysql']:execute('UPDATE players SET pincode = @pin WHERE citizenid = @identifier', {
 			['@pin'] = pin,
 			['@identifier'] = xPlayer.PlayerData.citizenid,
 		}, function(changed)
 		end)
 
-		xPlayer.Functions.RemoveMoney('bank', amount)
+		xPlayer.Functions.RemoveMoney('bank', cost)
 		xPlayer = QBCore.Functions.GetPlayer(_source)
 		TriggerClientEvent('okokBanking:updateMoney', _source, xPlayer.PlayerData.money.bank, xPlayer.PlayerData.money.cash)
-		TriggerEvent('okokBanking:AddTransferTransactionToSociety', amount, _source, "bank", "Bank (PIN)")
+		TriggerEvent('okokBanking:AddTransferTransactionToSociety', cost, _source, "bank", "Bank (PIN)")
 		TriggerClientEvent('okokBanking:updateIbanPinChange', _source)
-		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "PIN successfully changed to "..pin, 5000, 'success')
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "PIN successfully changed", 5000, 'success')
 	else
-		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "You need to have "..amount.."€ in order to change your PIN", 5000, 'error')
+		TriggerClientEvent('okokNotify:Alert', _source, "BANK", "You need to have "..cost.."€ in order to change your PIN", 5000, 'error')
 	end
 end)
 
