@@ -36,20 +36,10 @@ local function GetPlayerJobName(xPlayer)
 	return ''
 end
 
--- Returns a numeric money amount for a given money type (bank/cash), with fallbacks
+-- Returns a numeric money amount for a given money type (bank/cash)
 local function GetMoneyAmount(xPlayer, moneyType)
-	if not xPlayer then return 0 end
-
-	local amount = 0
-	if xPlayer.Functions and xPlayer.Functions.GetMoney then
-		amount = xPlayer.Functions.GetMoney(moneyType) or 0
-	end
-
-	if (not amount or amount <= 0) and xPlayer.PlayerData and xPlayer.PlayerData.money then
-		amount = xPlayer.PlayerData.money[moneyType] or 0
-	end
-
-	return tonumber(amount) or 0
+	if not xPlayer or not xPlayer.PlayerData or not xPlayer.PlayerData.money then return 0 end
+	return tonumber(xPlayer.PlayerData.money[moneyType]) or 0
 end
 
 -- Removes money safely, returning true only when the framework confirms success
@@ -263,6 +253,8 @@ if Config.EnablePoliceCommand then
 				template = '<div class="chat-message police"><i class="fas fa-bullhorn"></i> <b><span style="color: #4a6cfd">{0}</span>&nbsp;<span style="font-size: 14px; color: #e1e1e1;">{2}</span></b><div style="margin-top: 5px; font-weight: 300;">{1}</div></div>',
 				args = { playerName, message, time }
 			})
+		else
+			TriggerClientEvent('okokNotify:Alert', source, "POLICE", "You don't have the required job to use this command", 5000, 'error')
 		end
 	end)
 end
@@ -284,6 +276,8 @@ if Config.EnableAmbulanceCommand then
 				template = '<div class="chat-message ambulance"><i class="fas fa-ambulance"></i> <b><span style="color: #e3a71b">{0}</span>&nbsp;<span style="font-size: 14px; color: #e1e1e1;">{2}</span></b><div style="margin-top: 5px; font-weight: 300;">{1}</div></div>',
 				args = { playerName, message, time }
 			})
+		else
+			TriggerClientEvent('okokNotify:Alert', source, "AMBULANCE", "You don't have the required job to use this command", 5000, 'error')
 		end
 	end)
 end
