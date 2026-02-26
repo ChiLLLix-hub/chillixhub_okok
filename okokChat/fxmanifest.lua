@@ -11,6 +11,10 @@ files {
 	'web/*.*',
 }
 
+dependencies {
+	'qb-core',
+}
+
 shared_script 'config.lua'
 
 client_scripts {
