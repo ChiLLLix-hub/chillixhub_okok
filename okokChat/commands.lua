@@ -9,10 +9,20 @@ else
 	TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
 end
 
+-- Returns the QBCore core object, lazily retrying if startup init failed
+local function GetCoreObject()
+	if not QBCore then
+		local ok, obj = pcall(function() return exports['qb-core']:GetCoreObject() end)
+		if ok and obj then QBCore = obj end
+	end
+	return QBCore
+end
+
 -- Returns the QBCore player object, or nil if not loaded yet
 local function GetSafePlayer(source)
-	if not QBCore then return nil end
-	return QBCore.Functions.GetPlayer(source)
+	local core = GetCoreObject()
+	if not core then return nil end
+	return core.Functions.GetPlayer(source)
 end
 
 -- Returns "Firstname Lastname" from charinfo, falling back to the FiveM player name
@@ -36,10 +46,19 @@ local function GetPlayerJobName(xPlayer)
 	return ''
 end
 
--- Returns a numeric money amount for a given money type (bank/cash)
+-- Returns a numeric money amount for a given money type (bank/cash), with fallbacks
 local function GetMoneyAmount(xPlayer, moneyType)
-	if not xPlayer or not xPlayer.PlayerData or not xPlayer.PlayerData.money then return 0 end
-	return tonumber(xPlayer.PlayerData.money[moneyType]) or 0
+	if not xPlayer then return 0 end
+	-- Try the Functions.GetMoney API present in some QBCore forks first
+	if xPlayer.Functions and xPlayer.Functions.GetMoney then
+		local v = tonumber(xPlayer.Functions.GetMoney(moneyType))
+		if v ~= nil then return v end
+	end
+	-- Standard QBCore: money stored directly in PlayerData.money
+	if xPlayer.PlayerData and xPlayer.PlayerData.money then
+		return tonumber(xPlayer.PlayerData.money[moneyType]) or 0
+	end
+	return 0
 end
 
 -- Removes money safely, returning true only when the framework confirms success
@@ -296,10 +315,11 @@ end
 function isAdmin(xPlayer)
 	-- Guard: if player object or its source is unavailable, deny access
 	if not xPlayer or not xPlayer.PlayerData then return false end
+	local core = GetCoreObject()
 	-- Check using QBCore permission system (ACE permissions)
 	-- Config.StaffGroups can contain permission names like 'admin', 'god', etc.
 	for k,v in ipairs(Config.StaffGroups) do
-		if QBCore and QBCore.Functions.HasPermission(xPlayer.PlayerData.source, v) then 
+		if core and core.Functions.HasPermission(xPlayer.PlayerData.source, v) then 
 			return true 
 		end
 	end
@@ -307,9 +327,11 @@ function isAdmin(xPlayer)
 end
 
 function showOnlyForAdmins(admins)
-	local players = QBCore.Functions.GetPlayers()
+	local core = GetCoreObject()
+	if not core then return end
+	local players = core.Functions.GetPlayers()
 	for k,v in ipairs(players) do
-		local xPlayer = QBCore.Functions.GetPlayer(v)
+		local xPlayer = core.Functions.GetPlayer(v)
 		if xPlayer and isAdmin(xPlayer) then
 			admins(v)
 		end
